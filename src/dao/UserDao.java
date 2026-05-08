@@ -9,66 +9,67 @@ import db.DBConnection;
 import model.User;
 
 public class UserDao {
-    private DBConnection db;
-   
-    public UserDao() throws ClassNotFoundException, SQLException {
-        this.db = new DBConnection();
-    }
+	private DBConnection db;
 
-    public boolean register(User user) throws ClassNotFoundException, SQLException {
+	public UserDao() throws ClassNotFoundException, SQLException {
+		this.db = new DBConnection();
+	}
 
-        if (user.getUsername() == null || user.getUsername().trim().isEmpty() || user.getPassword() == null || user.getPassword().trim().isEmpty()) {
-            return false; 
-        }
+	public boolean register(User user) throws ClassNotFoundException, SQLException {
 
-        String checkSql = "SELECT * FROM users WHERE username = ?";
-        try (Connection conn = db.getConn();
-             PreparedStatement checkStmt = conn.prepareStatement(checkSql)) {
-           
-            checkStmt.setString(1, user.getUsername());
-            ResultSet rs = checkStmt.executeQuery();
-           
+		if (user.getUsername() == null || user.getUsername().trim().isEmpty() || user.getPassword() == null
+				|| user.getPassword().trim().isEmpty()) {
+			return false;
+		}
 
-            if (rs.next()) {
-                return false;
-            }
-        }
-       
+		String checkSql = "SELECT * FROM users WHERE username = ?";
+		try {
+			Connection conn = db.getConn(); 
+			PreparedStatement checkStmt = conn.prepareStatement(checkSql);
+			checkStmt.setString(1, user.getUsername());
+			ResultSet rs = checkStmt.executeQuery();
 
-        String sql = "INSERT INTO users (username, password) VALUES (?, ?)";
-        try (Connection conn = db.getConn();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-           
-            stmt.setString(1, user.getUsername());
-            stmt.setString(2, user.getPassword());
-           
-            stmt.executeUpdate();
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
+			if (rs.next()) {
+				return false;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
 
-    public boolean login(String username, String password) {
-  
-        if (username == null || username.trim().isEmpty() || password == null || password.trim().isEmpty()) {
-            return false; 
-        }
+		String sql = "INSERT INTO users (username, password) VALUES (?, ?)";
+		try {
+			Connection conn = db.getConn(); 
+			PreparedStatement stmt = conn.prepareStatement(sql);
+			stmt.setString(1, user.getUsername());
+			stmt.setString(2, user.getPassword());
 
-        String sql = "SELECT * FROM users WHERE username = ? AND password = ?";
-        try (Connection conn = db.getConn();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-           
-            stmt.setString(1, username);
-            stmt.setString(2, password);
-           
-            ResultSet rs = stmt.executeQuery();
-           
-            return rs.next();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
+			stmt.executeUpdate();
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	public boolean login(String username, String password) {
+
+		if (username == null || username.trim().isEmpty() || password == null || password.trim().isEmpty()) {
+			return false;
+		}
+
+		String sql = "SELECT * FROM users WHERE username = ? AND password = ?";
+		try (Connection conn = db.getConn(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+			stmt.setString(1, username);
+			stmt.setString(2, password);
+
+			ResultSet rs = stmt.executeQuery();
+
+			return rs.next();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
 }
