@@ -27,10 +27,10 @@ public static void main(String[] args) throws ClassNotFoundException, SQLExcepti
 		System.out.println(success ? "Registered!": "Failed.");
 	}else if (choice  == 2) {
 		boolean success = userDAO.login(username, password);
-		System.out.println(success ? "Login successful!" : "error invalid credentials.");
+		System.out.println(success ? "Login successful!" : "Invalid credentials.");
 		
 	} else {
-		System.out.println("error type 1 or 2");
+		System.out.println("type 1 or 2");
 	}
 }
 }
