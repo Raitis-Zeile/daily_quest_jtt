@@ -7,6 +7,7 @@ import java.sql.SQLException;
 
 import db.DBConnection;
 import model.User;
+import util.PasswordHash;
 
 public class UserDao {
 	private DBConnection db;
@@ -42,7 +43,8 @@ public class UserDao {
 			Connection conn = db.getConn(); 
 			PreparedStatement stmt = conn.prepareStatement(sql);
 			stmt.setString(1, user.getUsername());
-			stmt.setString(2, user.getPassword());
+			String hashedPassword = PasswordHash.hashPassword(user.getPassword());
+			stmt.setString(2, hashedPassword);
 
 			stmt.executeUpdate();
 			return true;
@@ -58,15 +60,53 @@ public class UserDao {
 			return false;
 		}
 
-		String sql = "SELECT * FROM users WHERE username = ? AND password = ?";
-		try (Connection conn = db.getConn(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+		String sql = "SELECT password FROM users WHERE username = ?";
+		try {
+			Connection conn = db.getConn();
+			PreparedStatement stmt = conn.prepareStatement(sql);
 
 			stmt.setString(1, username);
-			stmt.setString(2, password);
-
 			ResultSet rs = stmt.executeQuery();
 
-			return rs.next();
+			if (rs.next()) {
+				String storedHash = rs.getString("password");
+				return PasswordHash.verifyPassword(password, storedHash);
+			}
+			return false;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	public boolean deleteAccount(String username, String password) {
+		if (username == null || username.trim().isEmpty() || password == null || password.trim().isEmpty()) {
+			return false;
+		}
+
+		String selectSql = "SELECT password FROM users WHERE username = ?";
+		try {
+			Connection conn = db.getConn();
+			PreparedStatement selectStmt = conn.prepareStatement(selectSql);
+			selectStmt.setString(1, username);
+			ResultSet rs = selectStmt.executeQuery();
+
+			if (!rs.next()) {
+				return false;
+			}
+
+			String storedHash = rs.getString("password");
+			if (!PasswordHash.verifyPassword(password, storedHash)) {
+				return false;
+			}
+
+			String deleteSql = "DELETE FROM users WHERE username = ?";
+			PreparedStatement deleteStmt = conn.prepareStatement(deleteSql);
+			deleteStmt.setString(1, username);
+			int deleted = deleteStmt.executeUpdate();
+			deleteStmt.close();
+			selectStmt.close();
+			return deleted > 0;
 		} catch (Exception e) {
 			e.printStackTrace();
 			return false;
