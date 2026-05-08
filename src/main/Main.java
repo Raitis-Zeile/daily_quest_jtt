@@ -19,16 +19,18 @@ public static void main(String[] args) throws ClassNotFoundException, SQLExcepti
 	System.out.println("Username: ");
 	String username = scanner.nextLine();
 	
-	System.out.println("Password: ");
+	System.out.println("Password: "); 
 	String password = scanner.nextLine();
 	
 	if(choice == 1) {
 		boolean success = userDAO.register(new User(username, password));
 		System.out.println(success ? "Registered!": "Failed.");
-	}else {
+	}else if (choice  == 2) {
 		boolean success = userDAO.login(username, password);
-		System.out.println(success ? "Login successful!" : "Invalid credentials.");
+		System.out.println(success ? "Login successful!" : "error invalid credentials.");
 		
+	} else {
+		System.out.println("error type 1 or 2");
 	}
 }
 }
