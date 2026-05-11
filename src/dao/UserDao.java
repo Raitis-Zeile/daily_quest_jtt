@@ -54,62 +54,42 @@ public class UserDao {
 		}
 	}
 
-	public boolean login(String username, String password) {
 
-		if (username == null || username.trim().isEmpty() || password == null || password.trim().isEmpty()) {
-			return false;
-		}
+public User login(String username, String password) {
 
-		String sql = "SELECT password FROM users WHERE username = ?";
-		try {
-			Connection conn = db.getConn();
-			PreparedStatement stmt = conn.prepareStatement(sql);
+    if (username == null || username.trim().isEmpty()
+            || password == null || password.trim().isEmpty()) {
+        return null;
+    }
 
-			stmt.setString(1, username);
-			ResultSet rs = stmt.executeQuery();
+    String sql = "SELECT * FROM users WHERE username = ?";
 
-			if (rs.next()) {
-				String storedHash = rs.getString("password");
-				return PasswordHash.verifyPassword(password, storedHash);
-			}
-			return false;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return false;
-		}
-	}
+    try {
+        Connection conn = db.getConn();
 
-	public boolean deleteAccount(String username, String password) {
-		if (username == null || username.trim().isEmpty() || password == null || password.trim().isEmpty()) {
-			return false;
-		}
+        PreparedStatement stmt = conn.prepareStatement(sql);
 
-		String selectSql = "SELECT password FROM users WHERE username = ?";
-		try {
-			Connection conn = db.getConn();
-			PreparedStatement selectStmt = conn.prepareStatement(selectSql);
-			selectStmt.setString(1, username);
-			ResultSet rs = selectStmt.executeQuery();
+        stmt.setString(1, username);
 
-			if (!rs.next()) {
-				return false;
-			}
+        ResultSet rs = stmt.executeQuery();
 
-			String storedHash = rs.getString("password");
-			if (!PasswordHash.verifyPassword(password, storedHash)) {
-				return false;
-			}
+        if (rs.next()) {
 
-			String deleteSql = "DELETE FROM users WHERE username = ?";
-			PreparedStatement deleteStmt = conn.prepareStatement(deleteSql);
-			deleteStmt.setString(1, username);
-			int deleted = deleteStmt.executeUpdate();
-			deleteStmt.close();
-			selectStmt.close();
-			return deleted > 0;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return false;
-		}
-	}
-}
+            String storedHash = rs.getString("password");
+
+            if (PasswordHash.verifyPassword(password, storedHash)) {
+
+                return new User(
+                        rs.getInt("id"),
+                        rs.getString("username"),
+                        storedHash
+                );
+            }
+        }
+
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    return null;
+}}
