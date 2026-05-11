@@ -20,12 +20,7 @@ public class DataDao {
 
     public boolean hasQuestsToday(int userId) {
 
-        String sql = """
-                SELECT *
-                FROM data
-                WHERE user_id = ?
-                AND quest_date = CURDATE()
-                """;
+        String sql = "SELECT * FROM data WHERE user_id = ? AND quest_date = CURDATE()";
 
         try {
 
@@ -48,10 +43,7 @@ public class DataDao {
 
     public void assignQuest(int userId, int questId) {
 
-        String sql = """
-                INSERT INTO data(user_id, quest_id, time, done, quest_date)
-                VALUES (?, ?, CURTIME(), false, CURDATE())
-                """;
+        String sql = "INSERT INTO data(user_id, quest_id, time, done, quest_date) VALUES (?, ?, CURTIME(), false, CURDATE())";
 
         try {
 
@@ -73,13 +65,7 @@ public class DataDao {
 
         List<UserQuest> quests = new ArrayList<>();
 
-        String sql = """
-                SELECT q.id, q.quest, d.done
-                FROM data d
-                JOIN quest q ON d.quest_id = q.id
-                WHERE d.user_id = ?
-                AND d.quest_date = CURDATE()
-                """;
+        String sql = "SELECT q.id, q.quest, d.done FROM data d JOIN quest q ON d.quest_id = q.id WHERE d.user_id = ? AND d.quest_date = CURDATE()";
 
         try {
 
@@ -111,13 +97,7 @@ public class DataDao {
 
     public void completeQuest(int userId, int questId) {
 
-        String sql = """
-                UPDATE data
-                SET done = true
-                WHERE user_id = ?
-                AND quest_id = ?
-                AND quest_date = CURDATE()
-                """;
+        String sql = "UPDATE data SET done = true WHERE user_id = ? AND quest_id = ? AND quest_date = CURDATE()";
 
         try {
 
